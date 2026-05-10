@@ -1,0 +1,41 @@
+# Encuentros de Huida de la Oscuridad
+
+- **Kraan** (Sección 17): DC 16, Resistencia 24
+- **Vordak** (Sección 29): DC 17, Resistencia 25
+- **Vordak** (Sección 34): DC 17, Resistencia 25
+- **Oso negro** (Sección 43): DC 16, Resistencia 10
+- **Giak** (Sección 55): DC 9, Resistencia 9
+- **Loco** (Sección 63): DC 11, Resistencia 10
+- **Giak + lobo fatídico** (Sección 72): DC 15, Resistencia 24
+- **Giak 1** (Sección 112): DC 13, Resistencia 10
+- **Giak 2** (Sección 112): DC 12, Resistencia 10
+- **Serpiente alada** (Sección 133): DC 16, Resistencia 18
+- **Giak 1** (Sección 136): DC 13, Resistencia 10
+- **Giak 2** (Sección 136): DC 12, Resistencia 10
+- **Giak 1** (Sección 138): DC 13, Resistencia 10
+- **Giak 2** (Sección 138): DC 12, Resistencia 10
+- **Bichos de la cripta** (Sección 169): DC 16, Resistencia 16
+- **Alacrán zapador** (Sección 170): DC 17, Resistencia 7
+- **Jefe** (Sección 180): DC 15, Resistencia 22
+- **Soldado 1** (Sección 180): DC 13, Resistencia 20
+- **Soldado 2** (Sección 180): DC 12, Resistencia 20
+- **Guardaespaldas** (Sección 191): DC 11, Resistencia 21
+- **Giaks** (Sección 208): DC 15, Resistencia 13
+- **Guardaespaldas** (Sección 220): DC 11, Resistencia 20
+- **Víbora de los pantanos** (Sección 227): DC 16, Resistencia 6
+- **Kraan** (Sección 229): DC 16, Resistencia 25
+- **Salteador** (Sección 231): DC 13, Resistencia 20
+- **Drakkar** (Sección 246): DC 15, Resistencia 23
+- **Lobo fatídico 1** (Sección 253): DC 13, Resistencia 24
+- **Lobo fatídico 2** (Sección 253): DC 14, Resistencia 23
+- **Lobo fatídico 3** (Sección 253): DC 14, Resistencia 22
+- **Lobo fatídico 4** (Sección 253): DC 15, Resistencia 21
+- **Gourgaz** (Sección 255): DC 20, Resistencia 30
+- **Giak 1** (Sección 260): DC 11, Resistencia 18
+- **Giak 2** (Sección 260): DC 12, Resistencia 17
+- **Vordak** (Sección 283): DC 17, Resistencia 25
+- **Giak 1** (Sección 336): DC 14, Resistencia 11
+- **Giak 2** (Sección 336): DC 13, Resistencia 11
+- **Salteador** (Sección 339): DC 13, Resistencia 20
+- **Giak + lobo fatídico** (Sección 340): DC 14, Resistencia 24
+- **Vordak** (Sección 342): DC 18, Resistencia 26
