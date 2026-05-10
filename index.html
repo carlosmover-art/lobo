@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Lobo Solitario - Gestor de Campaña</title>
+    <!-- PWA & iOS Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Lobo Solitario">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+    
+    <!-- Google Fonts for premium typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=2">
+    <!-- Fuse.js for fuzzy search -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- MAIN MENU -->
+    <div id="main-menu" class="main-menu">
+        <div class="menu-content">
+            <div class="menu-logo">
+                <i class="fa-brands fa-wolf-pack-battalion"></i>
+                <h1>Lobo Solitario</h1>
+                <p>Gestor de Campaña Interactivo</p>
+            </div>
+            
+            <button id="btn-menu-new" class="btn-primary w-full menu-btn"><i class="fa-solid fa-plus"></i> Comenzar Nueva Aventura</button>
+            
+            <div class="saved-profiles">
+                <h3>Aventuras Guardadas</h3>
+                <div id="profiles-list" class="profiles-list">
+                    <!-- Profiles injected by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOOK SELECTION -->
+    <div id="book-selection" class="main-menu hidden">
+        <div class="book-selection-container">
+            <div class="header-section">
+                <h2>Elige tu Aventura</h2>
+                <button id="btn-cancel-book" class="btn-secondary"><i class="fa-solid fa-arrow-left"></i> Volver</button>
+            </div>
+            
+            <div class="book-category">
+                <h3><i class="fa-solid fa-sun"></i> Crónicas del Kai</h3>
+                <div class="book-grid" id="grid-kai">
+                    <!-- JS Injects Kai books -->
+                </div>
+            </div>
+
+            <div class="book-category">
+                <h3><i class="fa-solid fa-moon"></i> Crónicas del Magnakai</h3>
+                <div class="book-grid" id="grid-magnakai">
+                    <!-- JS Injects Magnakai books -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="app-container hidden">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fa-brands fa-wolf-pack-battalion"></i>
+                <h1>Lobo Solitario</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-tab="character"><i class="fa-solid fa-scroll"></i> <span>Hoja de Personaje</span></li>
+                <li data-tab="disciplines"><i class="fa-solid fa-medal"></i> <span>Disciplinas Kai</span></li>
+                <li data-tab="inventory"><i class="fa-solid fa-sack-dollar"></i> <span>Inventario</span></li>
+                <li data-tab="combat"><i class="fa-solid fa-khanda"></i> <span>Motor de Combate</span></li>
+                <li data-tab="map"><i class="fa-solid fa-map-location-dot"></i> <span>Mapa</span></li>
+                <li data-tab="journal"><i class="fa-solid fa-book-journal-whills"></i> <span>Diario</span></li>
+                <li data-tab="assistant"><i class="fa-solid fa-compass"></i> <span>Asistente de Reglas</span></li>
+                <li data-tab="tutorial"><i class="fa-solid fa-circle-question"></i> <span>Guía Kai</span></li>
+            </ul>
+            <div class="dice-roller">
+                <button id="btn-roll-dice" class="btn-primary">
+                    <i class="fa-solid fa-dice-d20"></i> Tirar Suerte
+                </button>
+                <div id="dice-result" class="dice-result">-</div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <!-- TAB: CHARACTER -->
+            <section id="tab-character" class="tab-content active">
+                <div class="header-section">
+                    <div>
+                        <h2>Hoja de Personaje</h2>
+                        <h3 id="char-name-display" class="char-name">Nombre: </h3>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btn-back-menu" class="btn-secondary"><i class="fa-solid fa-door-open"></i> Menú Principal</button>
+                    </div>
+                </div>
+                
+                <div id="stats-grid-main" class="stats-grid">
+                    <div class="stat-card main-stat">
+                        <h3>DESTREZA EN EL COMBATE (CS)</h3>
+                        <div class="stat-value highlight">
+                            <button class="btn-adjust" onclick="adjustStat('cs', -1)">-</button>
+                            <span id="char-cs">10</span>
+                            <button class="btn-adjust" onclick="adjustStat('cs', 1)">+</button>
+                        </div>
+                        <p class="stat-desc">Base: <span id="char-cs-base">10</span> <span id="char-cs-bonus" class="bonus-text"></span></p>
+                    </div>
+                    <div class="stat-card main-stat">
+                        <h3>PUNTOS DE RESISTENCIA (EP)</h3>
+                        <div class="stat-value highlight">
+                            <button class="btn-adjust" onclick="adjustStat('ep', -1)">-</button>
+                            <span id="char-ep">20</span>
+                            <button class="btn-adjust" onclick="adjustStat('ep', 1)">+</button>
+                        </div>
+                        <div class="hp-bar-container large">
+                            <div class="hp-bar" id="char-ep-bar"></div>
+                        </div>
+                        <p class="stat-desc">Máximo: <span id="char-ep-max">20</span></p>
+                    </div>
+                </div>
+
+                <!-- EXPLORATION PANEL -->
+                <div class="exploration-panel card">
+                    <div class="exploration-header">
+                        <h3><i class="fa-solid fa-map-location-dot"></i> Exploración de la Sección</h3>
+                        <div class="section-input-group">
+                            <label for="current-section-input">Sección Actual:</label>
+                            <input type="number" id="current-section-input" min="1" max="350" value="1">
+                            <button id="btn-section-read" class="btn-primary"><i class="fa-solid fa-check"></i> Leído</button>
+                        </div>
+                    </div>
+                    <div id="section-info" class="section-card">
+                        <!-- Section content loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: DISCIPLINES -->
+            <section id="tab-disciplines" class="tab-content">
+                <div class="header-section disciplines-header">
+                    <div>
+                        <h2>Disciplinas del Kai</h2>
+                        <p class="subtitle">Tus habilidades especiales como Señor del Kai. Tienes 5 seleccionadas.</p>
+                    </div>
+                    <div class="edit-lock-info">
+                        <button id="btn-unlock-disciplines" class="btn-secondary btn-sm">
+                            <i class="fa-solid fa-lock-open"></i> Editar Disciplinas
+                        </button>
+                        <button id="btn-lock-disciplines" class="btn-primary btn-sm hidden">
+                            <i class="fa-solid fa-check"></i> Confirmar Cambios
+                        </button>
+                        <p id="lock-warning-text" style="font-size: 0.75rem; color: var(--danger); margin-top: 5px;" class="hidden">La edición manual rompe las reglas.</p>
+                    </div>
+                </div>
+                <div class="disciplines-list" id="disciplines-list">
+                    <!-- Disciplines injected by JS -->
+                </div>
+            </section>
+
+            <!-- TAB: INVENTORY -->
+            <section id="tab-inventory" class="tab-content">
+                <h2>Inventario y Equipo</h2>
+                
+                <div class="inventory-grid">
+                    <div class="inventory-card">
+                        <h3><i class="fa-solid fa-khanda"></i> Armas (Máx. 2)</h3>
+                        <ul id="inv-weapons" class="item-list"></ul>
+                        <div class="add-item">
+                            <select id="input-weapons" style="flex: 1; padding: 10px; background: #111; color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
+                                <!-- JS inserta las armas -->
+                            </select>
+                            <button onclick="addItem('weapons')"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="inventory-card">
+                        <h3><i class="fa-solid fa-backpack"></i> Mochila (Máx. 8)</h3>
+                        <ul id="inv-backpack" class="item-list"></ul>
+                        <div class="add-item">
+                            <input type="text" id="input-backpack" placeholder="Añadir objeto...">
+                            <button onclick="addItem('backpack')"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <p class="slots-info">Ocupado: <span id="backpack-count">0</span>/8</p>
+                    </div>
+
+                    <div class="inventory-card">
+                        <h3><i class="fa-solid fa-star"></i> Objetos Especiales</h3>
+                        <ul id="inv-special" class="item-list"></ul>
+                        <div class="add-item">
+                            <input type="text" id="input-special" placeholder="Añadir objeto especial...">
+                            <button onclick="addItem('special')"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="inventory-card pouch-card">
+                        <h3><i class="fa-solid fa-coins"></i> Bolsa de Coronas</h3>
+                        <div class="stat-value">
+                            <button class="btn-adjust" onclick="adjustGold(-1)">-</button>
+                            <span id="char-gold">0</span>
+                            <button class="btn-adjust" onclick="adjustGold(1)">+</button>
+                        </div>
+                        <p class="slots-info">Máximo 50 coronas</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: COMBAT -->
+            <section id="tab-combat" class="tab-content">
+                <h2>Motor de Combate</h2>
+                <div class="combat-setup">
+                    <div class="enemy-setup card">
+                        <h3>Datos del Enemigo</h3>
+                        <div class="input-group">
+                            <label>Nombre del Enemigo</label>
+                            <input type="text" id="enemy-name" placeholder="Ej: Diablo Alado">
+                        </div>
+                        <div class="input-group">
+                            <label>Destreza en el Combate</label>
+                            <input type="number" id="enemy-cs" min="1" value="10">
+                        </div>
+                        <div class="input-group">
+                            <label>Resistencia</label>
+                            <input type="number" id="enemy-ep" min="1" value="20">
+                        </div>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="enemy-immune-mindblast"> Inmune a Ataque Psíquico
+                        </label>
+                    </div>
+                    
+                    <div class="combat-ratio card">
+                        <h3>Ratio de Combate</h3>
+                        <div class="ratio-display" id="combat-ratio">0</div>
+                        <p class="ratio-details" id="combat-ratio-details">CS Lobo Solitario (10) - CS Enemigo (10)</p>
+                        <button id="btn-start-combat" class="btn-primary w-full mt-4">Iniciar Combate</button>
+                    </div>
+                </div>
+
+                <div id="combat-active" class="combat-active hidden">
+                    <div class="combat-arena">
+                        <div class="fighter wolf">
+                            <h4>Lobo Solitario</h4>
+                            <div class="hp-bar-container">
+                                <div class="hp-bar" id="wolf-hp-bar"></div>
+                            </div>
+                            <p>Resistencia: <span id="combat-wolf-ep">20</span></p>
+                        </div>
+                        <div class="vs">VS</div>
+                        <div class="fighter enemy">
+                            <h4 id="combat-enemy-name-display">Enemigo</h4>
+                            <div class="hp-bar-container">
+                                <div class="hp-bar enemy-bar" id="enemy-hp-bar"></div>
+                            </div>
+                            <p>Resistencia: <span id="combat-enemy-ep">20</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="combat-controls">
+                        <button id="btn-combat-round" class="btn-primary"><i class="fa-solid fa-gavel"></i> Siguiente Asalto (Tirar Suerte)</button>
+                        <button id="btn-combat-flee" class="btn-secondary"><i class="fa-solid fa-person-running"></i> Eludir Combate</button>
+                    </div>
+
+                    <div class="combat-log" id="combat-log">
+                        <!-- Log lines -->
+                    </div>
+
+                    <div id="combat-end-actions" class="hidden" style="margin-top: 15px;">
+                        <button id="btn-save-combat-journal" class="btn-primary w-full"><i class="fa-solid fa-book-journal-whills"></i> Guardar resultado en el Diario</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Map Tab -->
+            <section id="tab-map" class="tab-content">
+                <div class="map-view-container" style="min-height: 600px; display: flex; flex-direction: column;">
+                    <div class="map-header">
+                        <h2>Mapa de Sommerlund</h2>
+                        <p id="map-region-name">Región actual: Desconocida</p>
+                    </div>
+                    <div class="map-wrapper" style="flex: 1; position: relative; background: #0a0a0a; border: 2px solid var(--primary-color); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <img src="map.png" alt="Mapa de Sommerlund" style="max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 0 30px rgba(0,0,0,0.8);">
+                        <div id="map-canvas" class="map-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                            <div id="map-marker" class="map-marker" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); color: #ff4d4d; font-size: 2.5rem; transition: all 1s ease; filter: drop-shadow(0 0 10px rgba(255, 77, 77, 0.8));">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span class="marker-pulse"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="map-legend" style="margin-top: 15px; text-align: center; color: #888;">
+                        <p><i class="fa-solid fa-circle-info"></i> Tu posición se actualiza automáticamente según la sección que explores.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: JOURNAL -->
+            <section id="tab-journal" class="tab-content">
+                <div class="header-section">
+                    <h2>Diario de Aventuras</h2>
+                    <button id="btn-save-checkpoint" class="btn-secondary"><i class="fa-solid fa-bookmark"></i> Guardar Checkpoint</button>
+                </div>
+                
+                <div class="journal-container">
+                    <div class="add-log">
+                        <textarea id="input-log" placeholder="Escribe tu progreso... Ej: Estoy en la sección 1, me atacan."></textarea>
+                        <button id="btn-add-log" class="btn-primary">Añadir Entrada</button>
+                    </div>
+                    
+                    <div class="timeline" id="journal-timeline">
+                        <!-- Timeline items -->
+                    </div>
+                    
+                    <!-- Chronicle / Finish Button -->
+                    <div class="adventure-footer" style="margin-top: 30px;">
+                        <button id="btn-finish-adventure" class="btn-secondary w-full" style="border-style: dashed;">
+                            <i class="fa-solid fa-flag-checkered"></i> Concluir Crónica de la Aventura
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: ASSISTANT -->
+            <section id="tab-assistant" class="tab-content">
+                <h2>Asistente de Reglas Kai</h2>
+                <p class="subtitle">Consulta los textos sagrados buscando por palabras clave (ej: Curación, Combate, Hacha).</p>
+                
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="input-search" placeholder="Buscar en las reglas...">
+                </div>
+
+                <div class="search-results" id="search-results">
+                    <!-- Results injected here -->
+                </div>
+            </section>
+
+            <!-- TAB: TUTORIAL -->
+            <section id="tab-tutorial" class="tab-content">
+                <div class="header-section">
+                    <h2>Guía de Juego (Tutorial)</h2>
+                </div>
+                
+                <div class="tutorial-grid">
+                    <div class="tutorial-card">
+                        <h3><i class="fa-solid fa-heart-pulse"></i> Salud y Resistencia</h3>
+                        <p>Tus puntos de <strong>Resistencia (EP)</strong> representan tu vida. Si llegan a 0, la aventura termina. Puedes recuperarlos comiendo (si tienes hambre) o usando la disciplina de <strong>Curación</strong> (+1 EP por sección sin combate).</p>
+                    </div>
+                    
+                    <div class="tutorial-card">
+                        <h3><i class="fa-solid fa-swords"></i> Combate</h3>
+                        <p>El combate se resuelve comparando tu <strong>Destreza en el Combate (CS)</strong> con la del enemigo. La diferencia es el <strong>Ratio de Combate</strong>. Una tirada de suerte (0-9) determina el daño en cada asalto según la tabla oficial.</p>
+                    </div>
+                    
+                    <div class="tutorial-card">
+                        <h3><i class="fa-solid fa-sack-gold"></i> Inventario y Oro</h3>
+                        <p>Puedes llevar hasta <strong>8 objetos</strong> en la mochila y <strong>2 armas</strong>. Las <strong>Coronas de oro</strong> no ocupan espacio en la mochila, van en su propia bolsa (máx. 50).</p>
+                    </div>
+                    
+                    <div class="tutorial-card">
+                        <h3><i class="fa-solid fa-wand-sparkles"></i> Disciplinas Kai</h3>
+                        <p>Son tus habilidades especiales. Algunas dan bonos permanentes (como <strong>Ataque Psíquico</strong>: +2 CS), mientras que otras te permiten elegir opciones especiales en el libro.</p>
+                    </div>
+                </div>
+
+                <div class="tutorial-rules-tip">
+                    <p><strong>Tip:</strong> Si ves un icono de regalo <i class="fa-solid fa-gift"></i> en la sección actual, ¡pulsa "Añadir" para recoger el objeto automáticamente!</p>
+                </div>
+            </section>
+        </main>
+      <div id="wizard-modal" class="main-menu hidden">
+        <div class="wizard-full-page">
+            <!-- Step 1: Identity & Method -->
+            <div id="wizard-step-1" class="wizard-step active">
+                <div class="wiz-header">
+                    <i class="fa-solid fa-feather-pointed wiz-icon"></i>
+                    <h2>Iniciación al Kai</h2>
+                    <p>Identidad y Destino</p>
+                </div>
+                
+                <div class="wiz-body">
+                    <div class="input-group">
+                        <label>¿Cómo te llamas, joven aspirante?</label>
+                        <input type="text" id="wiz-input-name" placeholder="Ej: Lobo Solitario" autocomplete="off">
+                    </div>
+
+                    <div class="method-selection-area">
+                        <label>Elige tu camino de creación:</label>
+                        <div class="method-choice">
+                            <button id="method-random" class="method-btn active">
+                                <i class="fa-solid fa-dice"></i>
+                                <span>Aleatorio</span>
+                                <small>Reglas Oficiales</small>
+                            </button>
+                            <button id="method-manual" class="method-btn">
+                                <i class="fa-solid fa-keyboard"></i>
+                                <span>Manual</span>
+                                <small>Importar Ficha</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiz-footer">
+                    <button id="wiz-next-1" class="btn-primary">Continuar <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 2: Combat Skill (CS) -->
+            <div id="wizard-step-2" class="wizard-step">
+                <div class="wiz-header">
+                    <i class="fa-solid fa-swords wiz-icon"></i>
+                    <h2>Destreza en el Combate</h2>
+                    <p>Tu habilidad con las armas y el coraje en la batalla.</p>
+                </div>
+
+                <div class="wiz-body">
+                    <div id="wiz-cs-random-area" class="stat-roll-container">
+                        <div class="roll-box">
+                            <div id="wiz-cs-dice" class="dice-display">?</div>
+                            <div class="roll-plus">+</div>
+                            <div class="roll-bonus">10</div>
+                        </div>
+                        <button id="wiz-btn-cs-roll" class="btn-primary">Tirar Suerte <i class="fa-solid fa-dice-d20"></i></button>
+                        <div id="wiz-cs-result-anim" class="stat-result-large hidden">
+                            <span>Tu Destreza es</span>
+                            <strong id="wiz-val-cs-total">20</strong>
+                        </div>
+                    </div>
+
+                    <div id="wiz-cs-manual-area" class="hidden">
+                        <div class="input-group">
+                            <label>Destreza en el Combate (CS)</label>
+                            <input type="number" id="wiz-manual-cs" value="15" min="10" max="30">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiz-footer">
+                    <button id="wiz-next-2" class="btn-secondary hidden">Siguiente: Resistencia <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 3: Endurance (EP) -->
+            <div id="wizard-step-3" class="wizard-step">
+                <div class="wiz-header">
+                    <i class="fa-solid fa-heart wiz-icon"></i>
+                    <h2>Puntos de Resistencia</h2>
+                    <p>Tu vitalidad y capacidad para soportar heridas.</p>
+                </div>
+
+                <div class="wiz-body">
+                    <div id="wiz-ep-random-area" class="stat-roll-container">
+                        <div class="roll-box">
+                            <div id="wiz-ep-dice" class="dice-display">?</div>
+                            <div class="roll-plus">+</div>
+                            <div class="roll-bonus">20</div>
+                        </div>
+                        <button id="wiz-btn-ep-roll" class="btn-primary">Tirar Suerte <i class="fa-solid fa-dice-d20"></i></button>
+                        <div id="wiz-ep-result-anim" class="stat-result-large hidden">
+                            <span>Tu Resistencia es</span>
+                            <strong id="wiz-val-ep-total">25</strong>
+                        </div>
+                    </div>
+
+                    <div id="wiz-ep-manual-area" class="hidden">
+                        <div class="input-group">
+                            <label>Puntos de Resistencia (EP)</label>
+                            <input type="number" id="wiz-manual-ep" value="25" min="10" max="50">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiz-footer">
+                    <button id="wiz-next-3" class="btn-secondary hidden">Siguiente: Disciplinas <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 4: Disciplines -->
+            <div id="wizard-step-4" class="wizard-step">
+                <div class="wiz-header">
+                    <i class="fa-solid fa-medal wiz-icon"></i>
+                    <h2>Disciplinas del Kai</h2>
+                    <p>Habilidades ancestrales de los Señores del Kai.</p>
+                </div>
+                
+                <div class="wiz-body">
+                    <p class="wiz-instruction">Selecciona exactamente <strong>5 disciplinas</strong>:</p>
+                    <div id="wiz-disciplines-grid" class="wiz-disciplines-grid-premium"></div>
+                </div>
+
+                <div class="wiz-footer">
+                    <div id="wiz-disc-counter" class="disc-counter">
+                        <span id="wiz-count-num">0</span> / 5
+                    </div>
+                    <button id="wiz-next-4" class="btn-secondary" disabled>Siguiente: Equipo <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 5: Equipment & Gold -->
+            <div id="wizard-step-5" class="wizard-step">
+                <div class="wiz-header">
+                    <i class="fa-solid fa-bag-shopping wiz-icon"></i>
+                    <h2>Equipo Inicial</h2>
+                    <p>Preparativos para el viaje.</p>
+                </div>
+
+                <div class="wiz-body">
+                    <div id="wiz-equipment-reveal" class="equipment-reveal-area">
+                        <!-- Sequentially revealed items -->
+                    </div>
+
+                    <div id="wiz-gold-area" class="gold-roll-area hidden">
+                        <p>Tirando suerte para el oro inicial...</p>
+                        <div class="gold-box">
+                            <i class="fa-solid fa-coins"></i>
+                            <span id="wiz-val-gold">?</span>
+                        </div>
+                        <button id="wiz-btn-gold-roll" class="btn-primary">Tirar Oro <i class="fa-solid fa-dice"></i></button>
+                    </div>
+
+                    <div id="wiz-manual-inventory" class="hidden">
+                        <div class="input-group">
+                            <label>Oro Inicial</label>
+                            <input type="number" id="wiz-manual-gold" value="10" min="0" max="50">
+                        </div>
+                        <div class="input-group mt-4">
+                            <label>Objetos adicionales (Comas)</label>
+                            <input type="text" id="wiz-manual-backpack" placeholder="Cuerda, Antorcha...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiz-footer">
+                    <button id="btn-finish-wizard" class="btn-primary hidden">
+                        ¡COMIENZA TU AVENTURA! <i class="fa-solid fa-sun"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMBAT IMPACT OVERLAY -->
+    <div id="combat-impact-overlay" class="combat-impact-overlay hidden">
+        <div class="impact-content">
+            <div id="impact-ls" class="impact-stat ls">
+                <span class="impact-label">TÚ</span>
+                <span id="impact-val-ls" class="impact-number">-0</span>
+            </div>
+            <div class="impact-divider">VS</div>
+            <div id="impact-enemy" class="impact-stat enemy">
+                <span class="impact-label">ENEMIGO</span>
+                <span id="impact-val-enemy" class="impact-number">-0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION SYSTEM -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <script src="book_data/navigation_map.js"></script>
+    <script src="rules.js"></script>
+    <script src="combat.js"></script>
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('Service Worker registrado con éxito');
+                }).catch(err => {
+                    console.log('Fallo al registrar el Service Worker', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
