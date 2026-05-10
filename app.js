@@ -1643,3 +1643,29 @@ document.getElementById('btn-cloud-download').addEventListener('click', async ()
         btn.innerHTML = 'Bajar';
     }
 });
+
+document.getElementById('btn-sync-current-cloud').addEventListener('click', async (e) => {
+    if (!activeProfileId || !gameState) return;
+    
+    const btn = e.currentTarget;
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
+    
+    try {
+        const profileToUpload = {
+            id: activeProfileId,
+            name: document.getElementById('char-name-display').textContent.replace('Nombre: ', '') || 'Lobo Solitario',
+            state: gameState
+        };
+        
+        const code = await uploadToCloud(profileToUpload);
+        alert(`PARTIDA SINCRONIZADA\n\nCdigo: ${code}\n\nUsa este cdigo en otro dispositivo para continuar tu aventura.`);
+    } catch (err) {
+        console.error(err);
+        alert("Error al sincronizar con la nube.");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+    }
+});
