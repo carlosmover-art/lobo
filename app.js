@@ -1533,3 +1533,113 @@ document.getElementById('btn-finish-adventure').addEventListener('click', () => 
 showMainMenu();
 // Remove old loboState if present to avoid confusion
 localStorage.removeItem('loboState');
+
+// ==========================================
+// CLOUD SYNC UI LOGIC
+// ==========================================
+document.getElementById('btn-menu-sync').addEventListener('click', () => {
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('sync-modal').classList.remove('hidden');
+    renderSyncUploadList();
+});
+
+document.getElementById('btn-close-sync').addEventListener('click', () => {
+    document.getElementById('sync-modal').classList.add('hidden');
+    document.getElementById('main-menu').classList.remove('hidden');
+    showMainMenu(); // Refresh main list
+});
+
+function renderSyncUploadList() {
+    const list = document.getElementById('sync-upload-list');
+    list.innerHTML = '';
+    
+    if (loboProfiles.length === 0) {
+        list.innerHTML = '<p style="color: #666; font-style: italic; font-size: 0.8rem;">No hay partidas para subir.</p>';
+        return;
+    }
+    
+    loboProfiles.forEach(prof => {
+        const item = document.createElement('div');
+        item.className = 'profile-card';
+        item.style.padding = '10px';
+        item.style.marginBottom = '8px';
+        item.innerHTML = `
+            <div style="flex-grow: 1;">
+                <h4 style="margin: 0; font-size: 0.9rem;">${prof.name}</h4>
+                <p style="margin: 0; font-size: 0.75rem; color: #888;">${prof.state.disciplines.length} Disciplinas</p>
+            </div>
+            <button class="btn-primary btn-sm" style="padding: 5px 10px;"><i class="fa-solid fa-cloud-arrow-up"></i> Subir</button>
+        `;
+        
+        item.querySelector('button').addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            
+            try {
+                const code = await uploadToCloud(prof);
+                addNotification({
+                    title: "Partida en la Nube!",
+                    body: `Tu código de sincronización es: ${code}. Úsalo en otro dispositivo para bajar la partida.`,
+                    type: 'success'
+                });
+                alert(`TU CÓDIGO DE SINCRONIZACIÓN:\n\n${code}\n\nAnótalo o cópialo.`);
+            } catch (err) {
+                console.error(err);
+                alert("Error al subir a la nube. Revisa tu conexión.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Subir';
+            }
+        });
+        list.appendChild(item);
+    });
+}
+
+document.getElementById('btn-cloud-download').addEventListener('click', async () => {
+    const input = document.getElementById('sync-code-input');
+    const code = input.value.trim().toUpperCase();
+    
+    if (!code.startsWith('LOBO-')) {
+        alert("El código debe empezar por LOBO-");
+        return;
+    }
+    
+    const btn = document.getElementById('btn-cloud-download');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    
+    try {
+        const downloadedProfile = await downloadFromCloud(code);
+        if (downloadedProfile) {
+            const exists = loboProfiles.some(p => p.id === downloadedProfile.id);
+            if (exists) {
+                if (!confirm("Ya tienes una partida con el mismo ID. ¿Deseas sobreescribirla?")) {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Bajar';
+                    return;
+                }
+                loboProfiles = loboProfiles.filter(p => p.id !== downloadedProfile.id);
+            }
+            
+            loboProfiles.push(downloadedProfile);
+            localStorage.setItem('loboProfiles', JSON.stringify(loboProfiles));
+            
+            addNotification({
+                title: "Sincronización Éxito!",
+                body: `La partida de "${downloadedProfile.name}" ha sido descargada.`,
+                type: 'success'
+            });
+            input.value = '';
+            document.getElementById('btn-close-sync').click();
+        } else {
+            alert("Código no encontrado o caducado.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error al descargar. Revisa el código o tu conexión.");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Bajar';
+    }
+});

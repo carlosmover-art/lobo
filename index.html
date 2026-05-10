@@ -30,6 +30,7 @@
             </div>
             
             <button id="btn-menu-new" class="btn-primary w-full menu-btn"><i class="fa-solid fa-plus"></i> Comenzar Nueva Aventura</button>
+            <button id="btn-menu-sync" class="btn-secondary w-full menu-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar en la Nube</button>
             
             <div class="saved-profiles">
                 <h3>Aventuras Guardadas</h3>
@@ -37,6 +38,38 @@
                     <!-- Profiles injected by JS -->
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- CLOUD SYNC MODAL -->
+    <div id="sync-modal" class="main-menu hidden">
+        <div class="menu-content" style="max-width: 500px;">
+            <div class="menu-header">
+                <i class="fa-solid fa-cloud-bolt" style="color: var(--primary-color); font-size: 3rem;"></i>
+                <h2>Sincronización</h2>
+                <p>Mueve tus partidas entre dispositivos.</p>
+            </div>
+            
+            <div class="sync-container" style="display: flex; flex-direction: column; gap: 20px; margin: 20px 0;">
+                <div class="sync-box" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="margin-bottom: 10px; font-size: 1rem; color: var(--primary-color);">Subir a la Nube</h3>
+                    <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">Elige una partida para generar un código de acceso.</p>
+                    <div id="sync-upload-list" class="profiles-list" style="max-height: 200px; overflow-y: auto;">
+                        <!-- List of profiles to upload -->
+                    </div>
+                </div>
+
+                <div class="sync-box" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="margin-bottom: 10px; font-size: 1rem; color: var(--primary-color);">Descargar de la Nube</h3>
+                    <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">Introduce el código generado en otro dispositivo.</p>
+                    <div class="input-group" style="display: flex; gap: 10px;">
+                        <input type="text" id="sync-code-input" placeholder="LOBO-XXXX" style="text-transform: uppercase; font-family: monospace; letter-spacing: 2px;">
+                        <button id="btn-cloud-download" class="btn-primary" style="padding: 10px 20px;">Bajar</button>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-close-sync" class="btn-secondary w-full">Cerrar</button>
         </div>
     </div>
 
@@ -563,9 +596,14 @@
     <!-- NOTIFICATION SYSTEM -->
     <div id="notification-container" class="notification-container"></div>
 
+    <!-- Firebase Core and Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <script src="book_data/navigation_map.js"></script>
     <script src="rules.js"></script>
     <script src="combat.js"></script>
+    <script src="firebase-sync.js"></script>
     <script src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
