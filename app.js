@@ -18,20 +18,8 @@ const WEAPONS_TABLE = ["Daga", "Lanza", "Maza", "Espada corta", "Martillo de gue
 let loboProfiles = JSON.parse(localStorage.getItem('loboProfiles')) || [];
 let activeProfileId = null;
 let gameState = null;
-let navigationMap = window.NAVIGATION_MAP || {};
-
-async function loadNavigationMap() {
-    // If not already loaded via script tag (file mode), try fetching (server mode)
-    if (Object.keys(navigationMap).length === 0) {
-        try {
-            const response = await fetch('book_data/navigation_map.json');
-            navigationMap = await response.json();
-        } catch (e) {
-            console.warn('Navigation map not found. Smart features will be limited.');
-        }
-    }
-}
-loadNavigationMap();
+// Navigation Map removed for 550-section edition
+let navigationMap = {};
 
 function saveState() {
     if (activeProfileId !== null) {
@@ -1079,121 +1067,24 @@ function markSectionAsRead() {
     const sectionNum = input.value;
     const infoArea = document.getElementById('section-info');
     
-    const data = navigationMap[sectionNum];
-    if (!data) {
-        infoArea.innerHTML = `<p class="placeholder-text">No se encontraron datos para la sección ${sectionNum}.</p>`;
-        return;
-    }
-
-    // Prepare bridging text: get the last sentence to "bridge" to the choice
-    const sentences = data.text.split(/[.!?]\s+/);
-    const bridgeText = sentences.length > 1 ? sentences[sentences.length - 1] : data.text;
-
-    let html = `
-        <div class="section-content-found">
-            <span class="section-title-tag">Sección ${sectionNum}</span>
-            
-            <div class="narrative-bridge">
-                <i class="fa-solid fa-quote-left bridge-icon"></i>
-                <p>...${bridgeText}</p>
-            </div>
-            
-            <div id="kai-counselor-tips" class="kai-tips-container">
-                <!-- Tips injected here -->
-            </div>
-    `;
-
-    // Combat Display
-    if (data.combat && data.combat.length > 0) {
-        const enemy = data.combat[0];
-        html += `
-            <div class="exploration-alert combat-alert">
-                <div class="alert-content">
-                    <p class="alert-title"><i class="fa-solid fa-swords"></i> ¡Enemigo a la vista!</p>
-                    <p class="alert-desc">${enemy.enemy} (DC ${enemy.cs}, RES ${enemy.ep})</p>
-                </div>
-                <button class="btn-primary btn-sm" onclick="prepareCombat('${enemy.enemy}', ${enemy.cs}, ${enemy.ep})">Combatir</button>
-            </div>
-        `;
-        
-        addNotification({
-            title: "¡Combate detectado!",
-            body: `En la sección ${sectionNum} te enfrentas a: ${enemy.enemy}.`,
-            action: {
-                text: "Ver en combate",
-                callback: () => prepareCombat(enemy.enemy, enemy.cs, enemy.ep)
-            }
-        });
-    }
-
-    // Items Display
-    if (data.items && data.items.length > 0) {
-        html += `
-            <div class="exploration-alert item-alert">
-                <div class="alert-content">
-                    <p class="alert-title"><i class="fa-solid fa-gift"></i> Hallazgo</p>
-                    <p class="alert-desc">Has encontrado: ${data.items.join(', ')}</p>
-                </div>
-                <div class="alert-actions">
-                    ${data.items.map(item => `
-                        <button class="btn-secondary btn-sm" onclick="autoAddItem('${item}')">Recoger ${item.split(' ')[0]}</button>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-        
-        data.items.forEach(item => {
-            addNotification({
-                title: "Objeto encontrado",
-                body: `Has encontrado: ${item}.`,
-                action: {
-                    text: "Añadir",
-                    callback: () => autoAddItem(item)
-                }
-            });
-        });
-    }
-
-    // Choices section
-    if (data.choices && data.choices.length > 0) {
-        html += `
-            <div class="choices-container">
-                <h4 class="choices-title">¿Hacia dónde quieres ir ahora?</h4>
-                <div class="choices-list">
-                    ${data.choices.map(choice => {
-                        // Clean choice text for cleaner UI
-                        let cleanText = choice.text.replace(/,?\s+(pasa|vete|dirígete|dirigete)\s+al\s+(número\s+)?\d+\.?/i, '').trim();
-                        if (cleanText.endsWith('.')) cleanText = cleanText.slice(0, -1);
-                        
-                        // Fallback if cleaning removed everything
-                        if (!cleanText || cleanText.length < 2) cleanText = choice.text;
-                        
-                        if (!choice.target) return ''; 
-
-                        return `
-                            <button class="btn-choice" onclick="selectChoice('${choice.target}')">
-                                <span>${cleanText}</span>
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </button>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-        `;
-    } else {
-        html += `<p class="no-choices">El destino de esta sección es incierto o has llegado al final de un camino.</p>`;
-    }
-
-    html += `</div>`;
-    infoArea.innerHTML = html;
+    addJournalEntry(`Sección ${sectionNum} alcanzada.`);
     
-    // Analyze disciplines for this section
-    renderKaiCounselorTips(sectionNum, data);
-
-    addJournalEntry(`Sección ${sectionNum} explorada.`);
-
-    // Disciplina de Curación: +1 EP por sección sin combate
-    if (gameState.disciplines.includes("Curación") && (!data.combat || data.combat.length === 0)) {
+    infoArea.innerHTML = `
+        <div class="section-manual-panel">
+            <span class="section-title-tag">Sección ${sectionNum}</span>
+            <p class="placeholder-text">Estás leyendo la sección ${sectionNum} en tu libro físico.</p>
+            
+            <div class="manual-actions-grid">
+                <button class="btn-secondary btn-sm" onclick="showManualCombat()"><i class="fa-solid fa-swords"></i> Iniciar Combate</button>
+                <button class="btn-secondary btn-sm" onclick="showManualLoot()"><i class="fa-solid fa-gift"></i> Añadir Botín</button>
+            </div>
+        </div>
+    `;
+    
+    updateMapPosition(sectionNum);
+    
+    // Disciplina de Curación: +1 EP por sección (manual)
+    if (gameState.disciplines.includes("Curación")) {
         if (gameState.stats.epCurrent < gameState.stats.epMax) {
             gameState.stats.epCurrent += 1;
             saveState();
@@ -1204,6 +1095,18 @@ function markSectionAsRead() {
             });
         }
     }
+}
+
+function showManualCombat() {
+    const combatTab = document.querySelector('.nav-links li[data-tab="combat"]');
+    if (combatTab) combatTab.click();
+    addNotification({ title: "Motor de Combate", body: "Introduce los datos del enemigo de tu libro.", type: 'primary' });
+}
+
+function showManualLoot() {
+    const invTab = document.querySelector('.nav-links li[data-tab="inventory"]');
+    if (invTab) invTab.click();
+    addNotification({ title: "Inventario", body: "Añade los objetos encontrados en esta sección.", type: 'primary' });
 }
 
 function autoAddItem(item) {
@@ -1269,146 +1172,15 @@ function prepareCombat(name, cs, ep) {
     addNotification({ title: "Preparado para el Combate", body: "Los datos del enemigo han sido pre-cargados.", type: 'success' });
 }
 
-function renderKaiCounselorTips(sectionNum, data) {
-    const container = document.getElementById('kai-counselor-tips');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    const tips = [];
-    const text = (data.text || "").toLowerCase();
-    const disciplines = gameState.disciplines;
-
-    // 1. Hunting (Caza)
-    if (disciplines.includes("Caza") && (text.includes("comer") || text.includes("hambriento") || text.includes("ración") || text.includes("comida"))) {
-        tips.push({
-            icon: "fa-solid fa-wheat-awn",
-            title: "Caza",
-            text: "No necesitas consumir raciones de comida en esta sección gracias a tu disciplina."
-        });
-    }
-
-    // 2. Healing (Curación)
-    if (disciplines.includes("Curación") && (!data.combat || data.combat.length === 0)) {
-        tips.push({
-            icon: "fa-solid fa-heart-pulse",
-            title: "Curación",
-            text: "Recuerda que recuperas +1 EP en esta sección por no haber combate (ya aplicado)."
-        });
-    }
-
-    // 3. Animal Kinship (Afinidad animal)
-    if (disciplines.includes("Afinidad animal") && (text.includes("animal") || text.includes("caballo") || text.includes("perro") || text.includes("lobo") || text.includes("oso"))) {
-        tips.push({
-            icon: "fa-solid fa-paw",
-            title: "Afinidad animal",
-            text: "Podrías intentar comunicarte o calmar a las criaturas presentes."
-        });
-    }
-
-    // 4. Check choices for specific disciplines
-    const disciplineChoices = [
-        { name: "Sexto sentido", icon: "fa-solid fa-eye" },
-        { name: "Rastreo", icon: "fa-solid fa-route" },
-        { name: "Camuflaje", icon: "fa-solid fa-mask" },
-        { name: "Poder mental sobre la materia", icon: "fa-solid fa-wand-sparkles" }
-    ];
-
-    disciplineChoices.forEach(d => {
-        if (disciplines.includes(d.name)) {
-            const hasChoice = data.choices && data.choices.some(c => c.text.includes(d.name));
-            if (hasChoice) {
-                tips.push({
-                    icon: d.icon,
-                    title: d.name,
-                    text: `¡Atención! Tienes una opción especial para usar esta disciplina en las opciones de abajo.`
-                });
-            }
-        }
-    });
-
-    // 5. Combat related
-    if (data.combat && data.combat.length > 0) {
-        if (disciplines.includes("Ataque psíquico")) {
-            tips.push({
-                icon: "fa-solid fa-brain",
-                title: "Ataque psíquico",
-                text: "Tu mente es un arma. Obtendrás +2 CS en el combate a menos que el enemigo sea inmune."
-            });
-        }
-        if (disciplines.includes("Defensa psíquica") && (text.includes("vordak") || text.includes("psíquico"))) {
-            tips.push({
-                icon: "fa-solid fa-shield-halved",
-                title: "Defensa psíquica",
-                text: "Estás protegido contra los ataques mentales de los enemigos en este encuentro."
-            });
-        }
-    }
-
-    // 6. Item detection (Enhanced)
-    const inventory = gameState.inventory;
-    const backpack = inventory.backpack.map(i => i.toLowerCase());
-    const special = inventory.special.map(i => i.toLowerCase());
-    
-    if (backpack.includes("cuerda") && (text.includes("pozo") || text.includes("barranco") || text.includes("precipicio") || text.includes("escalar"))) {
-        tips.push({
-            icon: "fa-solid fa-rope",
-            title: "Cuerda",
-            text: "Podrías usar tu cuerda aquí para descender con seguridad."
-        });
-    }
-    if (special.includes("mapa") && (text.includes("camino") || text.includes("dirección") || text.includes("donde ir"))) {
-        tips.push({
-            icon: "fa-solid fa-map",
-            title: "Mapa",
-            text: "Consulta tu mapa; esta región parece estar bien detallada en él."
-        });
-    }
-    if (special.includes("sello") && (text.includes("guardia") || text.includes("rey") || text.includes("noble"))) {
-        tips.push({
-            icon: "fa-solid fa-stamp",
-            title: "Sello Real",
-            text: "Mostrar tu sello podría abrirte puertas con las autoridades locales."
-        });
-    }
-
-    if (tips.length > 0) {
-        tips.forEach(tip => {
-            const div = document.createElement('div');
-            div.className = 'kai-tip-card';
-            div.innerHTML = `
-                <div class="kai-tip-icon"><i class="${tip.icon}"></i></div>
-                <div class="kai-tip-content">
-                    <strong>${tip.title}</strong>
-                    <p>${tip.text}</p>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    }
-    
-    updateMapPosition(sectionNum);
-}
-
-const REGION_MAP = {
-    "1-50": { name: "Monasterio Kai y Alrededores", x: 15, y: 25 },
-    "51-120": { name: "Bosques de Alether / Tierras Salvajes", x: 30, y: 40 },
-    "121-200": { name: "Llanuras de Sommerlund", x: 50, y: 50 },
-    "201-280": { name: "Camino a la Capital", x: 65, y: 65 },
-    "281-350": { name: "Afueras de Holmgard", x: 80, y: 75 },
-    "351-400": { name: "Ciudad Capital: Holmgard", x: 90, y: 85 }
-};
-
 function updateMapPosition(sectionNum) {
     const num = parseInt(sectionNum);
-    let region = { name: "Ruta Desconocida", x: 50, y: 50 };
+    let region = { name: "Ruta de la Aventura", x: 50, y: 50 };
     
-    for (const range in REGION_MAP) {
-        const [min, max] = range.split('-').map(Number);
-        if (num >= min && num <= max) {
-            region = REGION_MAP[range];
-            break;
-        }
-    }
+    // Simplificamos las regiones para el mapa general
+    if (num <= 100) region = { name: "Monasterio Kai y Alrededores", x: 15, y: 25 };
+    else if (num <= 250) region = { name: "Tierras Salvajes de Sommerlund", x: 35, y: 40 };
+    else if (num <= 400) region = { name: "Llanuras Centrales", x: 60, y: 55 };
+    else region = { name: "Cerca de la Capital", x: 85, y: 80 };
     
     const regName = document.getElementById('map-region-name');
     if (regName) regName.textContent = `Región actual: ${region.name}`;

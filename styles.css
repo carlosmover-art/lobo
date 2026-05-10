@@ -1,13 +1,13 @@
 :root {
     --bg-color: #1a1a1a;
     --panel-bg: #262626;
-    --primary-color: #8b6e4e; /* Dark gold/leather */
-    --primary-hover: #a88764;
+    --primary-color: #C59424; /* Premium gold */
+    --primary-hover: #e0ac2d;
     --text-main: #e0e0e0;
     --text-muted: #999;
     --danger: #b33a3a;
     --success: #3ab359;
-    --border-color: #333;
+    --border-color: #3d3d3d;
     
     --font-heading: 'Cinzel', serif;
     --font-body: 'Inter', sans-serif;
@@ -378,6 +378,29 @@ h2 {
     margin-top: 20px;
 }
 
+/* Manual Section Panel */
+.section-manual-panel {
+    background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+    border: 1px solid var(--border-color);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    animation: fadeIn 0.5s ease;
+}
+
+.manual-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.section-manual-panel .placeholder-text {
+    margin: 15px 0;
+    font-size: 1.1rem;
+    color: var(--text-main);
+}
+
 /* Notifications */
 .notification-container {
     position: fixed;
@@ -588,6 +611,12 @@ h2 {
 .card h3 {
     margin-bottom: 20px;
     color: var(--primary-color);
+}
+
+.combat-stats-input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
 }
 
 .input-group {

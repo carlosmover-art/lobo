@@ -167,7 +167,7 @@
                         <h3><i class="fa-solid fa-map-location-dot"></i> Exploración de la Sección</h3>
                         <div class="section-input-group">
                             <label for="current-section-input">Sección Actual:</label>
-                            <input type="number" id="current-section-input" min="1" max="350" value="1">
+                            <input type="number" id="current-section-input" min="1" max="550" value="1">
                             <button id="btn-section-read" class="btn-primary"><i class="fa-solid fa-check"></i> Leído</button>
                         </div>
                     </div>
@@ -253,16 +253,18 @@
                     <div class="enemy-setup card">
                         <h3>Datos del Enemigo</h3>
                         <div class="input-group">
-                            <label>Nombre del Enemigo</label>
-                            <input type="text" id="enemy-name" placeholder="Ej: Diablo Alado">
+                            <label for="enemy-name"><i class="fa-solid fa-skull"></i> Nombre del Enemigo</label>
+                            <input type="text" id="enemy-name" placeholder="Ej: Vordak, Lobo, etc.">
                         </div>
-                        <div class="input-group">
-                            <label>Destreza en el Combate</label>
-                            <input type="number" id="enemy-cs" min="1" value="10">
-                        </div>
-                        <div class="input-group">
-                            <label>Resistencia</label>
-                            <input type="number" id="enemy-ep" min="1" value="20">
+                        <div class="combat-stats-input-row">
+                            <div class="input-group">
+                                <label for="enemy-cs"><i class="fa-solid fa-swords"></i> Destreza (CS)</label>
+                                <input type="number" id="enemy-cs" value="10">
+                            </div>
+                            <div class="input-group">
+                                <label for="enemy-ep"><i class="fa-solid fa-heart"></i> Resistencia (EP)</label>
+                                <input type="number" id="enemy-ep" value="10">
+                            </div>
                         </div>
                         <label class="checkbox-label">
                             <input type="checkbox" id="enemy-immune-mindblast"> Inmune a Ataque Psíquico
@@ -601,7 +603,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
-    <script src="book_data/navigation_map.js"></script>
     <script src="rules.js"></script>
     <script src="combat.js"></script>
     <script src="firebase-sync.js"></script>
